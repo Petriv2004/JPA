@@ -8,12 +8,14 @@ package com.example.services;
 import com.example.PersistenceManager;
 import com.example.models.Competitor;
 import com.example.models.CompetitorDTO;
+import com.example.models.Login;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -87,22 +89,34 @@ public class CompetitorService {
         return Response.status(200).header("Access-Control-Allow-Origin", "*").entity(rta).build();
     }
 
-    @GET
-    @Path("/login/{addressN}/{password}")
+    @POST
+    @Path("/login")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Competitor logIn(@PathParam("addressN") String addressN, @PathParam("password") String password) throws NotAuthorizedException {
+    public Response logIn(Login login) {
         try {
+            String addressN = login.getAddress();
+            String password = login.getPassword();
+
             Query query = entityManager.createQuery("SELECT c FROM Competitor c WHERE c.address = :addressN");
             query.setParameter("addressN", addressN);
 
             Competitor competitor = (Competitor) query.getSingleResult();
 
             if (!competitor.getPassword().equals(password)) {
-                throw new NotAuthorizedException("Contraseña incorrecta");
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity("Contraseña incorrecta")
+                        .type("text/plain")
+                        .build();
             }
-            return competitor;
+
+            return Response.ok(competitor).build();
+
         } catch (NoResultException e) {
-            throw new NotAuthorizedException("Correo no registrado");
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity("Correo no registrado")
+                    .type("text/plain")
+                    .build();
         }
     }
 

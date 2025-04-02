@@ -9,3 +9,4 @@ La anotación agregada en la entidad Competitor indica que un competidor puede e
 ![imagen2](img/img2.png)
 ![imagen3](img/img3.png)
 ![imagen4](img/img4.png)
+![imagen5](img/img5.png)
